@@ -1,54 +1,72 @@
 # Import and initialize the pygame library
 import pygame
+import math
 import random
 
-#initialize the pygame
+# initialize the pygame
 pygame.init()
 
-#create the screen - width, height
+# create the screen - width, height
 screen = pygame.display.set_mode((1000, 400))
 
-#title and icon
+# title and icon
 pygame.display.set_caption("fairy escape")
 icon = pygame.image.load('flower-shop.png')
 background = pygame.image.load('16552.jpg')
 
 pygame.display.set_icon(icon)
 
-#player
+# player
 playerImg = pygame.image.load('fairy.png')
 playerX = 500
 playerY = 300
-
-#sparkle
+playerX_change = 0
+playerY_change = 0
+# sparkle
+# ready state means you can't see it
+# fire means sparkle is moving
 sparkleImg = pygame.image.load("sparkle.png")
 sparkleX = playerX
 sparkleY = playerY
 sparkleX_change = 0
-sparkleY_change = 5
+sparkleY_change = 10
 sparkle_state = "ready"
 
-#flower
-flowerX = 0
-flowerY = 0
-flowerX_change = 0
-flowerY_change = 0
-#ready state means you can't see it
-# fire means sparkle is moving
+flowerImg = []
+flowerX = []
+flowerY = []
+flowerX_change = []
+flowerY_change = []
+num_of_flowers = 6
+
+# flower
+for i in range(num_of_flowers):
+    flowerImg.append(pygame.image.load('flower.png'))
+    flowerX.append(random.randint(10, 50))
+    flowerY.append(random.randint(50, 150))
+    flowerX_change.append(5)
+    flowerY_change.append(20)
+
+# score
+score = 0
+font = pygame.font.Font('freesansbold.ttf', 32)
+
+textX = 10
+textY = 10
 
 
+def show_score(x, y):
+    score_count = font.render("Score : " + str(score), True, (0, 0, 0))
+    screen.blit(score_count, (x, y))
 
-flowerImg = pygame.image.load('flower.png')
-flowerX = random.randint(10, 50)
-flowerY = random.randint(50, 350)
-flowerX_change = 5
-flowerY_change = 20
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
 
-def flower(x, y):
-    screen.blit(flowerImg, (x, y))
+
+def flower(x, y, i):
+    screen.blit(flowerImg[i], (x, y))
+
 
 def fire_sparkle(x, y):
     global sparkle_state
@@ -56,33 +74,46 @@ def fire_sparkle(x, y):
     screen.blit(sparkleImg, (x, y))
 
 
-#game loop
+def isCollision(flowerX, flowerY, sparkleX, sparkleY):
+    distance = math.sqrt((math.pow(flowerX - sparkleX, 2)) + (math.pow(flowerY - sparkleY, 2)))
+    if distance < 20:
+        return True
+    else:
+        return False
+
+
+# game loop
 running = True
 while running:
-    #this happens first
+    # this happens first
     screen.fill((229, 204, 255))
     screen.blit(background, (0, 0))
 
     for event in pygame.event.get():
-        if event.type  == pygame.QUIT:
+        if event.type == pygame.QUIT:
             running = False
+        # if keystroke is pressed check whether its right or left
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                playerX_change = -10
+            if event.key == pygame.K_RIGHT:
+                playerX_change = 10
+            if event.key == pygame.K_UP:
+                playerY_change = -10
+            if event.key == pygame.K_DOWN:
+                playerY_change = 10
+            if event.key == pygame.K_SPACE:
+                if sparkle_state == "ready":
+                    sparkleX = playerX
+                    sparkleY = playerY
+                    fire_sparkle(sparkleX, sparkleY)
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                playerX_change = 0
+            if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                playerY_change = 0
 
-    #if keystroke is pressed check whether its right or left
-    if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_LEFT:
-            playerX -= 10
-        if event.key == pygame.K_RIGHT:
-            playerX += 10
-        if event.key == pygame.K_UP:
-            playerY -= 10
-        if event.key == pygame.K_DOWN:
-            playerY += 10
-        if event.key == pygame.K_SPACE:
-            if sparkle_state == "ready":
-                fire_sparkle(playerX, playerY)
-
-
-    #player movement
+    # player movement
     if playerX >= 950:
         playerX = 950
     if playerX <= 0:
@@ -92,34 +123,45 @@ while running:
     if playerY <= 0:
         playerY = 0
 
-    #flower movement
+    # flower movement
+    for i in range(num_of_flowers):
+        if flowerX[i] >= 950:
+            flowerX_change[i] = -5
+            flowerY[i] += flowerY_change[i]
+        if flowerX[i] <= 0:
+            flowerX_change[i] = 5
+            flowerY[i] += flowerY_change[i]
+        if flowerY[i] >= 350:
+            flowerY_change[i] = -20
+        if flowerY[i] <= 0:
+            flowerY_change[i] = 20
 
-    if flowerX >= 950:
-        flowerX_change = -5
-        flowerY += flowerY_change
-    if flowerX <= 0:
-        flowerX_change = 5
-        flowerY += flowerY_change
-    if flowerY >= 350:
-        flowerY_change = -20
-    if flowerY <= 0:
-        flowerY_change = 20
-        playerY = 0
 
-    #bullet movement
+        # collision
+        collision = isCollision(flowerX[i], flowerY[i], sparkleX, sparkleY)
+        if collision:
+            sparkleY = playerY
+            sparkleX = playerX
+            sparkle_state = "ready"
+            score += 1
+            print(score)
+            flowerX[i] = random.randint(10, 50)
+            flowerY[i] = random.randint(50, 150)
+
+        flowerX[i] += flowerX_change[i]
+        flower(flowerX[i], flowerY[i], i)
+
+    # bullet movement
+    if sparkleY <= 0:
+        sparkle_state = "ready"
     if sparkle_state == "fire":
         fire_sparkle(sparkleX, sparkleY)
         sparkleY -= sparkleY_change
-        if sparkleY <= 0:
-            sparkle_state = "ready"
-            sparkleX = playerX
-            sparkleY = playerY
 
+    playerY += playerY_change
+    playerX += playerX_change
 
     player(playerX, playerY)
-    flower(flowerX, flowerY)
-
-    flowerX += flowerX_change
-
+    show_score(textX, textY)
 
     pygame.display.update()
