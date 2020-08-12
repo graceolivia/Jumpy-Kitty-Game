@@ -15,7 +15,7 @@ class Spritesheet:
         return image
 
 class Player(pg.sprite.Sprite):
-    #this allows the player to know about the game (passing the game tot he player)
+    #this allows the player to know about the game (passing the game to he player)
     def __init__(self, game):
         pg.sprite.Sprite.__init__(self)
         self.game = game
@@ -32,26 +32,27 @@ class Player(pg.sprite.Sprite):
         self.acc = vec(0, 0)
 
     def load_images(self):
-        self.standing_frames = [self.game.spritesheet.get_image(67, 196, 66, 92),
-                               self.game.spritesheet.get_image(0, 196, 66, 92)]
-        self.walk_frames_r = [self.game.spritesheet.get_image(73, 98, 72, 97),
-                               self.game.spritesheet.get_image(146, 98, 72, 97),
-                               self.game.spritesheet.get_image(219, 0, 72, 97),
-                                self.game.spritesheet.get_image(292, 0, 72, 97)]
+        self.standing_frames = [self.game.spritesheet.get_image(17, 0, 43, 40),
+                               self.game.spritesheet.get_image(66, 0, 42, 40),]
+        self.walk_frames_r = [self.game.spritesheet.get_image(249, 0, 49, 41),
+                               self.game.spritesheet.get_image(199, 0, 49, 41),]
         self.walk_frames_l = []
         for frame in self.walk_frames_r:
             self.walk_frames_l.append(pg.transform.flip(frame, True, False))
-        self.jump_frame_r = self.game.spritesheet.get_image(438, 93, 67, 94)
+        self.jump_frame_r = self.game.spritesheet.get_image(108, 0, 44, 41)
         self.jump_frame_l = pg.transform.flip(self.jump_frame_r, True, False)
 
 
 
+
     def jump(self):
+        # jump only if standing on a platform
         self.rect.x += 1
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         self.rect.x -= 1
         if hits:
             self.vel.y = -20
+
 
 
     def update(self):
@@ -78,10 +79,10 @@ class Player(pg.sprite.Sprite):
             self.pos.x = 0
         if self.pos.x < 0:
             self.pos.x = WIDTH
-        if self.pos.y > HEIGHT:
-            self.pos.y = 0
-        if self.pos.y < 0:
-            self.pos.y = HEIGHT
+        # if self.pos.y > HEIGHT:
+        #     self.pos.y = 0
+        # if self.pos.y < 0:
+        #     self.pos.y = HEIGHT
 
         self.rect.midbottom = self.pos
 
@@ -133,7 +134,8 @@ class Platform(pg.sprite.Sprite):
     def __init__(self, x, y, w, h):
         pg.sprite.Sprite.__init__(self)
         self.image = pg.Surface((w, h))
-        self.image.fill((RED))
+        pcolor = pastelMaker()
+        self.image.fill((pcolor))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
