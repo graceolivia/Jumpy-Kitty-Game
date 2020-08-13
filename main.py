@@ -61,11 +61,9 @@ class Game:
             self.player.pos.y += abs(self.player.vel.y)
             for plat in self.platforms:
                 plat.rect.y += abs(self.player.vel.y)
-                for plat in self.platforms:
-                    plat.rect.y += abs(self.player.vel.y)
-                    if plat.rect.top >= HEIGHT:
-                        plat.kill()
-                        self.score += 10
+                if plat.rect.top >= HEIGHT:
+                    plat.kill()
+                    self.score += 10
 
         if self.player.rect.bottom > HEIGHT:
             for sprite in self.all_sprites:
