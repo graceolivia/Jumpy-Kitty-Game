@@ -1,6 +1,6 @@
 import random
 
-TITLE = "Zippy"
+TITLE = "Pip's Dream"
 WIDTH = 480
 HEIGHT = 600
 FPS = 60
@@ -25,6 +25,7 @@ PLATFORM_LIST = [(0, HEIGHT - 30),
 # Game Properties
 BOOST_POWER = 60
 POW_SPAWN_PCT = 10
+MOB_FREQ = 5000
 
 #background scrolling coordinates
 BG_X = 0

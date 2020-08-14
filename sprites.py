@@ -44,15 +44,6 @@ class Player(pg.sprite.Sprite):
             self.walk_frames_l.append(pg.transform.flip(frame, True, False))
         self.jump_frame_r = self.game.spritesheet.get_image(216, 0, 88, 82)
         self.jump_frame_l = pg.transform.flip(self.jump_frame_r, True, False)
-        # self.standing_frames = [self.game.spritesheet.get_image(17, 0, 43, 40),
-        #                        self.game.spritesheet.get_image(66, 0, 42, 40),]
-        # self.walk_frames_r = [self.game.spritesheet.get_image(249, 0, 49, 41),
-        #                        self.game.spritesheet.get_image(199, 0, 49, 41),]
-        # self.walk_frames_l = []
-        # for frame in self.walk_frames_r:
-        #     self.walk_frames_l.append(pg.transform.flip(frame, True, False))
-        # self.jump_frame_r = self.game.spritesheet.get_image(108, 0, 44, 41)
-        # self.jump_frame_l = pg.transform.flip(self.jump_frame_r, True, False)
 
 
     def jump_cut(self):
@@ -144,6 +135,7 @@ class Player(pg.sprite.Sprite):
                 self.image = self.standing_frames[self.current_frame]
                 self.rect = self.image.get_rect()
                 self.rect.bottom = bottom
+        self.mask = pg.mask.from_surface(self.image)
 
 
 
@@ -178,6 +170,36 @@ class Pow(pg.sprite.Sprite):
         if not self.game.platforms.has(self.plat):
             self.kill()
 
+
+class Mob(pg.sprite.Sprite):
+    def __init__(self, game):
+        self.groups = game.all_sprites, game.mobs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image_right = self.game.othersprites.get_image(42, 26, 52, 36)
+        self.image_left = pg.transform.flip(self.image_right, True, False)
+        self.image = self.image_right
+        self.rect = self.image.get_rect()
+        self.rect.centerx = choice([-100, WIDTH + 100])
+        self.vx = randrange(1, 4)
+        if self.rect.centerx > WIDTH:
+            self.vx *= -1
+        self.rect.y = randrange(HEIGHT / 2)
+        self.vy = 0
+        self.dy = 0.5
+    def update(self):
+        if self.vx < 0:
+            self.image = self.image_left
+        self.rect.x += self.vx
+        self.vy += self.dy
+        if self.vy > 3 or self.vy < -3:
+            self.dy *= -1
+        center = self.rect.center
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.rect.y += self.vy
+        if self.rect.left > WIDTH + 100 or self.rect.right < -100:
+            self.kill()
 
 class Background(pg.sprite.Sprite):
     def __init__(self, image_file, location):

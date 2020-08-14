@@ -34,6 +34,7 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
         self.powerups = pg.sprite.Group()
+        self.mobs = pg.sprite.Group()
         self.all_sprites.add(self.screenbackground)
         self.player = Player(self)
         self.all_sprites.add(self.player)
@@ -41,6 +42,7 @@ class Game:
             p = Platform(self, *plat)
             self.all_sprites.add(p)
             self.platforms.add(p)
+        self.mob_timer = 0
         self.run()
 
     def run(self):
@@ -55,6 +57,15 @@ class Game:
     def update(self):
         # Game Loop - Update
         self.all_sprites.update()
+        # spawn a mob?
+        now = pg.time.get_ticks()
+        if now - self.mob_timer > 5000 + random.choice([-1000, -500, 0, 500, 1000, 1500]):
+            self.mob_timer = now
+            Mob(self)
+        #hit mob?
+        mob_hits = pg.sprite.spritecollide(self.player, self.mobs, False)
+        if mob_hits:
+            self.playing = False
         # check if player hits a platform - only if falling
         if self.player.vel.y > 0:
             hits = pg.sprite.spritecollide(self.player, self.platforms, False)
@@ -72,6 +83,8 @@ class Game:
         if self.player.rect.top <= HEIGHT / 4:
             #add more platforms, updatescore
             self.player.pos.y += abs(self.player.vel.y)
+            for mob in self.mobs:
+                mob.rect.y += abs(self.player.vel.y)
             for plat in self.platforms:
                 plat.rect.y += abs(self.player.vel.y)
                 if plat.rect.top >= HEIGHT:
