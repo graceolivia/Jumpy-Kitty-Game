@@ -24,16 +24,21 @@ class Game:
         img_dir = path.join(self.dir, 'img')
         #load spritesheet image
         self.spritesheet = Spritesheet(path.join(img_dir, SPRITESHEET))
+        self.screenbackground = Background(BACKGROUND, [BG_X, BG_Y])
+        self.othersprites = Spritesheet(path.join(img_dir, OTHERSPRITES))
+
 
     def new(self):
         #start a new game
         self.score = 0
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
+        self.powerups = pg.sprite.Group()
+        self.all_sprites.add(self.screenbackground)
         self.player = Player(self)
         self.all_sprites.add(self.player)
         for plat in PLATFORM_LIST:
-            p = Platform(*plat)
+            p = Platform(self, *plat)
             self.all_sprites.add(p)
             self.platforms.add(p)
         self.run()
@@ -54,17 +59,37 @@ class Game:
         if self.player.vel.y > 0:
             hits = pg.sprite.spritecollide(self.player, self.platforms, False)
             if hits:
-                self.player.pos.y = hits[0].rect.top
-                self.player.vel.y = 0
+                lowest = hits[0]
+                for hit in hits:
+                    if hit.rect.bottom > lowest.rect.bottom:
+                        lowest = hit
+                if self.player.pos.x < lowest.rect.right + 10  and self.player.pos.x > lowest.rect.left - 10:
+                    if self.player.pos.y < lowest.rect.bottom:
+                        self.player.pos.y = lowest.rect.top
+                        self.player.vel.y = 0
+                        self.player.jumping = False
         # if player reaches top 1/4 of screen
         if self.player.rect.top <= HEIGHT / 4:
+            #add more platforms, updatescore
             self.player.pos.y += abs(self.player.vel.y)
             for plat in self.platforms:
                 plat.rect.y += abs(self.player.vel.y)
                 if plat.rect.top >= HEIGHT:
+                    # update background when you pass a platform
+                    self.screenbackground.rect.top -= 20
+                    if self.screenbackground.rect.top < -1650:
+                        self.screenbackground.rect.top = 0
                     plat.kill()
                     self.score += 10
+        # power up collision
+        pow_hits = pg.sprite.spritecollide(self.player, self.powerups, True)
+        for pow in pow_hits:
+            if pow.type == 'boost':
+                self.player.vel.y = -BOOST_POWER
+                self.player.jumping = False
 
+
+        # die
         if self.player.rect.bottom > HEIGHT:
             for sprite in self.all_sprites:
                 sprite.rect.y -= max(self.player.vel.y, 10)
@@ -75,9 +100,8 @@ class Game:
         #spawn new platforms
         while len(self.platforms) < 6:
             width = random.randrange(50, 100)
-            p = Platform(random.randrange(0, WIDTH-width),
-                         random.randrange(-75, -30),
-                         width, 10)
+            p = Platform(self, random.randrange(0, WIDTH-width),
+                         random.randrange(-75, -30))
             self.platforms.add(p)
             self.all_sprites.add(p)
 
@@ -93,9 +117,13 @@ class Game:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_SPACE:
                     self.player.jump()
+            if event.type == pg.KEYUP:
+                if event.key == pg.K_SPACE:
+                    self.player.jump_cut()
 
     def draw(self):
         self.screen.fill(BGCOLOR)
+        self.screen.blit(self.screenbackground.image, self.screenbackground.rect)
         self.all_sprites.draw(self.screen)
         self.draw_text(str(self.score), 22, WHITE, WIDTH / 2, 15)
         # after drawing everything, flip display
@@ -112,6 +140,7 @@ class Game:
     def show_go_screen(self):
         #game over/continue
         self.screen.fill(BGCOLOR)
+        self.screenbackground.rect.top = BG_Y
         self.draw_text("Game Over", 48, WHITE, WIDTH / 2, HEIGHT / 4)
         self.draw_text("Score: " + str(self.score), 22, WHITE, WIDTH / 2, HEIGHT / 2)
         self.draw_text("press a key to play again", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
