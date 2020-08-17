@@ -24,6 +24,7 @@ class Player(pg.sprite.Sprite):
         self.game = game
         self.walking = False
         self.jumping = False
+        self.immortal = False
         self.current_frame = 0
         self.last_update = 0
         self.load_images()
@@ -44,6 +45,7 @@ class Player(pg.sprite.Sprite):
             self.walk_frames_l.append(pg.transform.flip(frame, True, False))
         self.jump_frame_r = self.game.spritesheet.get_image(216, 0, 88, 82)
         self.jump_frame_l = pg.transform.flip(self.jump_frame_r, True, False)
+        self.immortal_frame = self.game.spritesheet.get_image(708, 8, 76, 66)
 
 
     def jump_cut(self):
@@ -65,6 +67,8 @@ class Player(pg.sprite.Sprite):
 
     def update(self):
         self.animate()
+        if self.immortal == True:
+            self.acc = vec(0, 0.3)
         self.acc = vec(0, GRAVITY)
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
@@ -87,10 +91,6 @@ class Player(pg.sprite.Sprite):
             self.pos.x = 0
         if self.pos.x < 0:
             self.pos.x = WIDTH
-        # if self.pos.y > HEIGHT:
-        #     self.pos.y = 0
-        # if self.pos.y < 0:
-        #     self.pos.y = HEIGHT
 
         self.rect.midbottom = self.pos
 
@@ -106,6 +106,11 @@ class Player(pg.sprite.Sprite):
         else:
             self.jumping = False
         #show walk animation
+        if self.immortal == True:
+            self.walking = False
+            self.jumping = False
+            self.image = self.immortal_frame
+            self.rect = self.image.get_rect()
         if self.walking:
             if now - self.last_update > 100:
                 self.last_update = now
@@ -127,7 +132,7 @@ class Player(pg.sprite.Sprite):
             self.rect = self.image.get_rect()
             self.rect.bottom = bottom
         #stand animation
-        if not self.jumping and not self.walking:
+        if not self.jumping and not self.walking and not self.immortal:
             if now - self.last_update > 350:
                 self.last_update = now
                 self.current_frame = (self.current_frame + 1) % len(self.standing_frames)
@@ -159,8 +164,11 @@ class Pow(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.plat = plat
-        self.type = choice(['boost'])
-        self.image = self.game.othersprites.get_image(0, 0, 42, 42)
+        self.type = choice(['boost', 'blue'])
+        if self.type == 'boost':
+            self.image = self.game.othersprites.get_image(0, 0, 42, 42)
+        if self.type == 'blue':
+            self.image = self.game.othersprites.get_image(326, 0, 50, 38)
         self.rect = self.image.get_rect()
         self.rect.centerx = self.plat.rect.centerx
         self.rect.bottom = self.plat.rect.top - 5
@@ -179,6 +187,7 @@ class Mob(pg.sprite.Sprite):
         self.image_right = self.game.othersprites.get_image(42, 26, 52, 36)
         self.image_left = pg.transform.flip(self.image_right, True, False)
         self.image = self.image_right
+        self.active = True
         self.rect = self.image.get_rect()
         self.rect.centerx = choice([-100, WIDTH + 100])
         self.vx = randrange(1, 4)
@@ -196,6 +205,7 @@ class Mob(pg.sprite.Sprite):
             self.dy *= -1
         center = self.rect.center
         self.rect = self.image.get_rect()
+        self.mask = pg.mask.from_surface(self.image)
         self.rect.center = center
         self.rect.y += self.vy
         if self.rect.left > WIDTH + 100 or self.rect.right < -100:

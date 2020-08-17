@@ -26,6 +26,10 @@ class Game:
         self.spritesheet = Spritesheet(path.join(img_dir, SPRITESHEET))
         self.screenbackground = Background(BACKGROUND, [BG_X, BG_Y])
         self.othersprites = Spritesheet(path.join(img_dir, OTHERSPRITES))
+        #load sounds
+        self.meow_sound = pg.mixer.Sound("sng/Meow.ogg")
+        self.hit_sound = pg.mixer.Sound("sng/sfx_sounds_damage3.wav")
+        self.coin_sound = pg.mixer.Sound("sng/sfx_coin_single4.wav")
 
 
     def new(self):
@@ -43,16 +47,20 @@ class Game:
             self.all_sprites.add(p)
             self.platforms.add(p)
         self.mob_timer = 0
+        self.immortal_timer = 50000
+        pg.mixer.music.load("sng/Talking Cute.ogg")
         self.run()
 
     def run(self):
         #game loop
+        # pg.mixer.music.play(loops=-1)
         self.playing = True
         while self.playing:
             self.clock.tick(FPS)
             self.events()
             self.update()
             self.draw()
+        pg.mixer.music.fadeout(500)
 
     def update(self):
         # Game Loop - Update
@@ -62,10 +70,19 @@ class Game:
         if now - self.mob_timer > 5000 + random.choice([-1000, -500, 0, 500, 1000, 1500]):
             self.mob_timer = now
             Mob(self)
+        # turn off immortal after enough time
+        if self.player.immortal == True:
+            if now - self.immortal_timer > 10000:
+                self.immortal_timer = now
+                self.player.immortal = False
         #hit mob?
-        mob_hits = pg.sprite.spritecollide(self.player, self.mobs, False)
+        mob_hits = pg.sprite.spritecollide(self.player, self.mobs, False, pg.sprite.collide_mask)
         if mob_hits:
-            self.playing = False
+            if self.player.immortal == True:
+                pass
+            else:
+                self.hit_sound.play()
+                self.playing = False
         # check if player hits a platform - only if falling
         if self.player.vel.y > 0:
             hits = pg.sprite.spritecollide(self.player, self.platforms, False)
@@ -100,6 +117,10 @@ class Game:
             if pow.type == 'boost':
                 self.player.vel.y = -BOOST_POWER
                 self.player.jumping = False
+                self.meow_sound.play()
+            if pow.type == 'blue':
+                self.player.immortal = True
+                self.coin_sound.play()
 
 
         # die

@@ -1,10 +1,11 @@
 import random
 
+
 TITLE = "Pip's Dream"
 WIDTH = 480
 HEIGHT = 600
 FPS = 60
-SPRITESHEET = "picropsheet.png"
+SPRITESHEET = "pipspritesheet.png"
 OTHERSPRITES = "spritesheetforjumpygame.png"
 BACKGROUND = "img/jumpy background.png"
 FONT_NAME = 'arial'
@@ -33,7 +34,7 @@ BG_Y = 0
 
 
 # define colors
-WHITE = (223, 230, 233)
+WHITE = (25, 32, 34)
 BLACK = (25, 32, 34)
 RED = (214, 48, 49)
 GREEN = (85, 239, 196)
