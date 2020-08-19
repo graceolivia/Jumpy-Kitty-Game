@@ -9,6 +9,7 @@ SPRITESHEET = "pipspritesheet.png"
 OTHERSPRITES = "spritesheetforjumpygame.png"
 BACKGROUND = "img/jumpy background.png"
 FONT_NAME = 'arial'
+HS_FILE = "highscore.txt"
 
 #player properties
 PLAYER_ACC = 0.5
