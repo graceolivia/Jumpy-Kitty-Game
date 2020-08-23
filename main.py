@@ -84,7 +84,7 @@ class Game:
                 self.hit_sound.play()
                 self.playing = False
         # check if player hits a platform - only if falling
-        if self.player.vel.y > 0:
+        if self.player.vel.y >= 0:
             hits = pg.sprite.spritecollide(self.player, self.platforms, False)
             if hits:
                 lowest = hits[0]

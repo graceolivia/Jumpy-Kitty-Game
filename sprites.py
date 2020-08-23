@@ -36,9 +36,9 @@ class Player(pg.sprite.Sprite):
         self.acc = vec(0, 0)
 
     def load_images(self):
-        self.standing_frames = [self.game.spritesheet.get_image(34, 0, 86, 80),
-                               self.game.spritesheet.get_image(132, 0, 84, 80),]
-        self.walk_frames_r = [self.game.spritesheet.get_image(498, 0, 98, 82),
+        self.standing_frames = [self.game.spritesheet.get_image(34, 0, 80, 80),
+                               self.game.spritesheet.get_image(132, 0, 80, 80),]
+        self.walk_frames_r = [self.game.spritesheet.get_image(498, 0, 90, 82),
                                self.game.spritesheet.get_image(398, 0, 98, 82),]
         self.walk_frames_l = []
         for frame in self.walk_frames_r:
@@ -52,7 +52,6 @@ class Player(pg.sprite.Sprite):
         if self.jumping:
             if self.vel.y < -3:
                 self.vel.y = -3
-
 
     def jump(self):
         # jump only if standing on a platform
