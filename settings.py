@@ -15,6 +15,7 @@ HS_FILE = "highscore.txt"
 PLAYER_ACC = 0.5
 PLAYER_FRICTION = -.12
 GRAVITY = 0.7
+PLAYER_JUMP = 20
 
 #starting platforms
 PLATFORM_LIST = [(0, HEIGHT - 30),

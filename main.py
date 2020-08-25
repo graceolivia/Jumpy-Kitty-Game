@@ -53,7 +53,7 @@ class Game:
 
     def run(self):
         #game loop
-        # pg.mixer.music.play(loops=-1)
+        pg.mixer.music.play(loops=-1)
         self.playing = True
         while self.playing:
             self.clock.tick(FPS)
@@ -84,15 +84,16 @@ class Game:
                 self.hit_sound.play()
                 self.playing = False
         # check if player hits a platform - only if falling
-        if self.player.vel.y >= 0:
+        if self.player.vel.y > -4:
             hits = pg.sprite.spritecollide(self.player, self.platforms, False)
             if hits:
                 lowest = hits[0]
                 for hit in hits:
                     if hit.rect.bottom > lowest.rect.bottom:
                         lowest = hit
-                if self.player.pos.x < lowest.rect.right + 10  and self.player.pos.x > lowest.rect.left - 10:
-                    if self.player.pos.y < lowest.rect.bottom:
+                if self.player.pos.x < lowest.rect.right + 10 and \
+                   self.player.pos.x > lowest.rect.left - 10:
+                    if self.player.pos.y < lowest.rect.centery:
                         self.player.pos.y = lowest.rect.top
                         self.player.vel.y = 0
                         self.player.jumping = False
@@ -123,7 +124,7 @@ class Game:
                 self.coin_sound.play()
 
 
-        # die
+        # if you die
         if self.player.rect.bottom > HEIGHT:
             for sprite in self.all_sprites:
                 sprite.rect.y -= max(self.player.vel.y, 10)

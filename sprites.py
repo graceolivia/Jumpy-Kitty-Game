@@ -60,7 +60,7 @@ class Player(pg.sprite.Sprite):
         self.rect.x -= 2
         if hits and not self.jumping:
             self.jumping = True
-            self.vel.y = -20
+            self.vel.y = -PLAYER_JUMP
 
 
 
