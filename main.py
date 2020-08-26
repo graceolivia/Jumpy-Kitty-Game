@@ -91,8 +91,8 @@ class Game:
                 for hit in hits:
                     if hit.rect.bottom > lowest.rect.bottom:
                         lowest = hit
-                if self.player.pos.x < lowest.rect.right + 10 and \
-                   self.player.pos.x > lowest.rect.left - 10:
+                if self.player.pos.x < lowest.rect.right + 20 and \
+                   self.player.pos.x > lowest.rect.left - 20:
                     if self.player.pos.y < lowest.rect.centery:
                         self.player.pos.y = lowest.rect.top
                         self.player.vel.y = 0
