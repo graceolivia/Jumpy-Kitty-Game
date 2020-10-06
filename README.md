@@ -1,3 +1,5 @@
+A jumping game made with Pygame. Help Pip jump up and get points, avoid the dangerous floating bunnymice, and catch blueberries and sparkles for extra jumping power!
+
 song is https://opengameart.org/content/talking-cute
 by Alex McCulloch
 
